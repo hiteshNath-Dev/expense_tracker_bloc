@@ -1,11 +1,11 @@
-import 'package:expense_tracker_bloc/Bloc/AmmountBloc/ammount_bloc.dart';
-import 'package:expense_tracker_bloc/Bloc/HomeBloc/Home_bloc.dart';
-import 'package:expense_tracker_bloc/Bloc/cubit/setDateCubit.dart';
-import 'package:expense_tracker_bloc/Bloc/cubit/transactionCubit.dart';
-import 'package:expense_tracker_bloc/Models/expenseModel.dart';
-import 'package:expense_tracker_bloc/services/HiveHelper/HiveHelper.dart';
-import 'package:expense_tracker_bloc/utils/Color/AppColors.dart';
-import 'package:expense_tracker_bloc/views/homepage.dart';
+import 'package:expense_tracker_bloc/presentation/bloc/amount/amount_bloc.dart';
+import 'package:expense_tracker_bloc/presentation/bloc/home/home_bloc.dart';
+import 'package:expense_tracker_bloc/presentation/bloc/date/date_cubit.dart';
+import 'package:expense_tracker_bloc/presentation/bloc/transaction/transaction_cubit.dart';
+import 'package:expense_tracker_bloc/data/models/expense_model.dart';
+import 'package:expense_tracker_bloc/data/data_sources/local/hive_helper.dart';
+import 'package:expense_tracker_bloc/core/constants/app_colors.dart';
+import 'package:expense_tracker_bloc/presentation/pages/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive/hive.dart';
@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
           create: (context) => DateCubit(),
         ),
         BlocProvider(
-          create: (context) => AmmountBloc(HiveHelper(), context),
+          create: (context) => AmountBloc(HiveHelper(), context),
         ),
         BlocProvider(
           create: (context) => HomeBloc(HiveHelper()),
