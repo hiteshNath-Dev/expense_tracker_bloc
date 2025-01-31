@@ -1,21 +1,16 @@
-import 'package:equatable/equatable.dart';
+part of 'home_bloc.dart';
 
-abstract class HomeEvent extends Equatable {
-  @override
-  //implement props
-  List<Object?> get props => [];
-}
+abstract class HomeEvent {}
 
-class HomeLoadedEvent extends HomeEvent {
-  HomeLoadedEvent();
-
-  @override
-  //implement props
-  List<Object?> get props => [];
-}
+class HomeLoadedEvent extends HomeEvent {}
 
 class HomeDeleteEvent extends HomeEvent {
-  final int key; // Or ExpenseModel expense;
-
+  final dynamic key;
   HomeDeleteEvent(this.key);
+}
+
+class HomeAddExpenseEvent extends HomeEvent {
+  final Expense expense;
+
+  HomeAddExpenseEvent(this.expense);
 }

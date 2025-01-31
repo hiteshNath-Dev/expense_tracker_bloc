@@ -23,12 +23,12 @@ class AmountBloc extends Bloc<AmountEvent, AmountState> {
           emit(const AmountAddedErrorState(
               errormsg: 'Please Enter the Description'));
         } else {
-          emit(AmountValidateState());
-          await helper
-              .addAmount(
-                  event.amount, event.amountType, event.descrip, event.date)
-              .then((value) =>
-                  emit(const AmountAddedSuccessState(successmsg: 'Success')));
+          // emit(AmountValidateState());
+          // await helper
+          //     .addAmount(
+          //         event.amount, event.amountType, event.descrip, event.date)
+          //     .then((value) =>
+          //         emit(const AmountAddedSuccessState(successmsg: 'Success')));
         }
       } catch (e) {
         if (kDebugMode) {

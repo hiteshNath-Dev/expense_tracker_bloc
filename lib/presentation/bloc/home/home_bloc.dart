@@ -1,43 +1,62 @@
-import 'package:expense_tracker_bloc/presentation/bloc/home/home_event.dart';
-import 'package:expense_tracker_bloc/presentation/bloc/home/home_state.dart';
-import 'package:expense_tracker_bloc/data/data_sources/local/hive_helper.dart';
+import 'dart:developer';
+
+import 'package:expense_tracker_bloc/domain/entities/expense.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../domain/repositories/expense_repository.dart';
+
+part 'home_event.dart';
+part 'home_state.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
-  final HiveHelper helper;
+  final ExpenseRepository repository;
 
-  HomeBloc(this.helper) : super(HomeInitial()) {
-    // Load Expenses
-    on<HomeLoadedEvent>((event, emit) {
-      _loadExpenses(emit);
+  HomeBloc(this.repository) : super(HomeInitial()) {
+    on<HomeLoadedEvent>((event, emit) async {
+      emit(HomeInitial()); // Emit initial state before loading
+      final result = await repository.getExpenses(); // Get expenses
+
+      await result.fold(
+        (failure) async =>
+            emit(HomeErrorState(failure.message)), // Handle failure
+        (expenses) async {
+          // log("expenses--->${expenses.first.key}");
+
+          final totalExpenseResult = await repository.getTotalExpense();
+          await totalExpenseResult.fold(
+            (failure) async =>
+                emit(HomeErrorState(failure.message)), // Handle failure
+            (totalExpense) async {
+              emit(HomeLoadedState(
+                expenseList: expenses,
+                totalExpense: totalExpense,
+              ));
+            },
+          );
+        },
+      );
     });
 
-    // Delete Expense
-    on<HomeDeleteEvent>((event, emit) {
-      helper.deleteExpense(event.key); // Delete from Hive
-      _loadExpenses(emit); // Reload and update state
+    on<HomeDeleteEvent>((event, emit) async {
+      final deleteResult = await repository.deleteExpense(event.key);
+      log("key--->${event.key}");
+      await deleteResult.fold(
+        (failure) async =>
+            emit(HomeErrorState(failure.message)), // Handle failure
+        (_) async {
+          await Future.delayed(const Duration(milliseconds: 100));
+          add(HomeLoadedEvent()); // Reload the list after deletion
+        },
+      );
     });
-  }
 
-  // Helper function to load expenses
-  void _loadExpenses(Emitter<HomeState> emit) {
-    final expenses = helper.getAllExpenses().reversed.toList();
-
-    // Calculate totals
-    double totalIncome = 0.0;
-    double totalExpense = 0.0;
-    double totalBalance = 0.0;
-
-    for (var expense in expenses) {
-      if (expense.amountType == 'TransactionType.income') {
-        totalBalance += double.parse(expense.amount);
-        totalIncome += double.parse(expense.amount);
-      } else if (expense.amountType == 'TransactionType.expense') {
-        totalBalance -= double.parse(expense.amount);
-        totalExpense += double.parse(expense.amount);
-      }
-    }
-
-    emit(HomeLoadedState(expenses, totalBalance, totalIncome, totalExpense));
+    on<HomeAddExpenseEvent>((event, emit) async {
+      final addResult = await repository.addExpense(event.expense);
+      await addResult.fold(
+        (failure) async => emit(HomeErrorState(failure.message)),
+        (_) async {
+          add(HomeLoadedEvent()); // Reload the list after adding
+        },
+      );
+    });
   }
 }

@@ -9,16 +9,16 @@ abstract class AmountEvent extends Equatable {
 
 class AmountAddEvent extends AmountEvent {
   final String amount;
-  final String amountType;
+  final String category;
   final String descrip;
   final String date;
 
   const AmountAddEvent(
       {required this.amount,
-      required this.amountType,
+      required this.category,
       required this.descrip,
       required this.date});
 
   @override
-  List<Object> get props => [amount, amountType, descrip, date];
+  List<Object> get props => [amount, category, descrip, date];
 }

@@ -1,15 +1,12 @@
-import 'package:expense_tracker_bloc/presentation/bloc/home/home_bloc.dart';
-import 'package:expense_tracker_bloc/presentation/bloc/home/home_event.dart';
-import 'package:expense_tracker_bloc/presentation/bloc/home/home_state.dart';
-import 'package:expense_tracker_bloc/presentation/pages/add_amount_page.dart';
-import 'package:expense_tracker_bloc/presentation/widgets/total_balance.dart';
-import 'package:expense_tracker_bloc/core/constants/image_asset.dart';
-import 'package:expense_tracker_bloc/core/constants/app_colors.dart';
-import 'package:expense_tracker_bloc/core/utils/extension.dart';
-import 'package:expense_tracker_bloc/core/utils/utils.dart';
+import 'package:expense_tracker_bloc/domain/entities/expense.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/utils/category_utils.dart';
+import '../../core/constants/app_colors.dart';
+import '../../core/utils/utils.dart';
+import '../bloc/home/home_bloc.dart';
+import 'add_expense_page.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -21,145 +18,207 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   @override
   void initState() {
-    context.read<HomeBloc>().add(HomeLoadedEvent());
     super.initState();
+    context.read<HomeBloc>().add(HomeLoadedEvent());
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          onPressed: () {},
-          icon: Image.asset(
-            ImageAsset.leadingHome,
-            height: context.mh * 0.06,
-            width: context.mw * 0.06,
-            color: AppColor.blackColor,
-          ),
-        ),
         title: Text(
-          'DashBoard',
+          'Expense Tracker',
           style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
       body: BlocBuilder<HomeBloc, HomeState>(
         builder: (context, state) {
-          if (state is HomeLoadedState) {
+          if (state is HomeLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is HomeLoadedState) {
             return Column(
               children: [
-                TotalBalanceComp(
-                    value: state.totalbalance.toString(),
-                    Incnomevalue: state.totalIncome.toString(),
-                    Expensevalue: state.totalExpense.toString()),
-                0.03.ph(context),
+                // Total Expense Card
+                Container(
+                  margin: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [
+                        AppColor.blackColor,
+                        AppColor.blueColor,
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.2),
+                        spreadRadius: 2,
+                        blurRadius: 5,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Total Expenses',
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          color: Colors.white70,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '\$${state.totalExpense.toStringAsFixed(2)}',
+                        style: GoogleFonts.poppins(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Recent Expenses
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Recent Expenses',
+                        style: GoogleFonts.poppins(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
+                // Expenses List
                 Expanded(
                   child: ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     physics: const BouncingScrollPhysics(),
-                    // reverse: true,
                     itemCount: state.expenseList.length,
                     itemBuilder: (context, index) {
+                      final expense = state.expenseList[index];
+
                       return Dismissible(
-                        key: Key(state.expenseList[index].key.toString()),
+                        key: ValueKey(
+                            expense.key), // Ensure you have a unique id
                         direction: DismissDirection.endToStart,
                         background: Container(
-                          color: Colors.red,
-                          alignment: Alignment.centerRight,
+                          margin: const EdgeInsets.symmetric(vertical: 4),
                           padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: const Icon(Icons.delete, color: Colors.white),
+                          decoration: BoxDecoration(
+                            color: Colors.red.shade100,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          alignment: Alignment.centerRight,
+                          child: Icon(
+                            Icons.delete_outline,
+                            color: Colors.red.shade700,
+                          ),
                         ),
                         onDismissed: (direction) {
                           context.read<HomeBloc>().add(
-                              HomeDeleteEvent(state.expenseList[index].key));
+                                HomeDeleteEvent(expense.key),
+                              );
                         },
-                        child: Column(
-                          children: [
-                            ListTile(
-                              leading: Container(
-                                height: context.mh * 0.14,
-                                width: context.mh * 0.07,
-                                margin:
-                                    EdgeInsets.only(right: context.mw * 0.03),
-                                padding: const EdgeInsets.all(6),
-                                decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                        colors: [
-                                          AppColor.blackColor,
-                                          AppColor.blueColor,
-                                        ],
-                                        begin: Alignment.center,
-                                        end: Alignment.topLeft),
-                                    borderRadius: BorderRadius.circular(20)),
-                                child: const Icon(Icons.currency_exchange,
-                                    size: 20, color: Colors.white),
-                              ),
-                              title: Text(state.expenseList[index].descrip,
-                                  style: GoogleFonts.poppins(
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.bold)),
-                              subtitle: Text(Utils.dateFormated(
-                                  state.expenseList[index].date.toString())),
-                              trailing: state.expenseList[index].amountType ==
-                                      'TransactionType.income'
-                                  ? Container(
-                                      margin: EdgeInsets.only(
-                                          right: context.mw * 0.03),
-                                      padding: const EdgeInsets.all(6),
-                                      decoration: BoxDecoration(
-                                          color: Colors.grey,
-                                          borderRadius:
-                                              BorderRadius.circular(20)),
-                                      child: Icon(
-                                        Icons.arrow_downward,
-                                        size: 30,
-                                        color: Colors.green[700],
-                                      ),
-                                    )
-                                  : Container(
-                                      margin: EdgeInsets.only(
-                                          right: context.mw * 0.03),
-                                      padding: const EdgeInsets.all(6),
-                                      decoration: BoxDecoration(
-                                          color: Colors.grey,
-                                          borderRadius:
-                                              BorderRadius.circular(20)),
-                                      child: Icon(
-                                        Icons.arrow_upward,
-                                        size: 30,
-                                        color: Colors.red[700],
-                                      ),
-                                    ),
+                        child: Card(
+                          elevation: 0,
+                          margin: const EdgeInsets.symmetric(vertical: 4),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(
+                              color: Colors.grey.shade200,
                             ),
-                            const Divider(
-                              endIndent: 30,
-                              indent: 30,
-                            )
-                          ],
+                          ),
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            leading: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: CategoryUtils.getColorForCategory(
+                                  ExpenseCategory.fromString(expense.category),
+                                ).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(
+                                CategoryUtils.getIconForCategory(
+                                  ExpenseCategory.fromString(expense.category),
+                                ),
+                                color: CategoryUtils.getColorForCategory(
+                                  ExpenseCategory.fromString(expense.category),
+                                ),
+                              ),
+                            ),
+                            title: Text(
+                              expense.description,
+                              style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            subtitle: Text(
+                              Utils.dateFormated(expense.date),
+                              style: GoogleFonts.poppins(
+                                color: Colors.grey,
+                                fontSize: 12,
+                              ),
+                            ),
+                            trailing: Text(
+                              '\$${expense.amount}',
+                              style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                                color: CategoryUtils.getColorForCategory(
+                                  ExpenseCategory.fromString(expense.category),
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       );
                     },
                   ),
-                )
+                ),
               ],
             );
+          } else if (state is HomeErrorState) {
+            return Center(child: Text(state.error));
           } else {
-            return Container();
+            return const Center(child: Text('No expenses found.'));
           }
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColor.blackColor,
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const addAmount(),
-              ));
+            context,
+            MaterialPageRoute(
+              builder: (context) => const AddExpensePage(),
+            ),
+          );
         },
-        child: const Icon(
-          Icons.add,
-          color: AppColor.whiteColor,
+        backgroundColor: AppColor.blackColor,
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: Text(
+          'Add Expense',
+          style: GoogleFonts.poppins(
+            color: Colors.white,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ),
     );

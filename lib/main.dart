@@ -1,7 +1,6 @@
-import 'package:expense_tracker_bloc/presentation/bloc/amount/amount_bloc.dart';
+import 'package:expense_tracker_bloc/data/repositories/expense_repository_impl.dart';
+import 'package:expense_tracker_bloc/domain/repositories/expense_repository.dart';
 import 'package:expense_tracker_bloc/presentation/bloc/home/home_bloc.dart';
-import 'package:expense_tracker_bloc/presentation/bloc/date/date_cubit.dart';
-import 'package:expense_tracker_bloc/presentation/bloc/transaction/transaction_cubit.dart';
 import 'package:expense_tracker_bloc/data/models/expense_model.dart';
 import 'package:expense_tracker_bloc/data/data_sources/local/hive_helper.dart';
 import 'package:expense_tracker_bloc/core/constants/app_colors.dart';
@@ -16,28 +15,38 @@ void main() async {
   var directory = await getApplicationDocumentsDirectory();
   Hive.init(directory.path);
   Hive.registerAdapter(ExpenseModelAdapter());
+  Hive.registerAdapter(ExpenseCategoryAdapter());
+
   await Hive.openBox<ExpenseModel>('ExpenseBox');
-  runApp(const MyApp());
+  final hiveHelper = HiveHelper();
+  final expenseRepository = ExpenseRepositoryImpl(hiveHelper);
+
+  runApp(MyApp(
+    expenseRepository: expenseRepository,
+  ));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final ExpenseRepository expenseRepository;
+
+  const MyApp({
+    super.key,
+    required this.expenseRepository,
+  });
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(
-          create: (context) => TransactionCubit(),
-        ),
-        BlocProvider(
-          create: (context) => DateCubit(),
-        ),
-        BlocProvider(
-          create: (context) => AmountBloc(HiveHelper(), context),
-        ),
-        BlocProvider(
-          create: (context) => HomeBloc(HiveHelper()),
-        )
+        // BlocProvider(
+        //   create: (context) => TransactionCubit(),
+        // ),
+        // BlocProvider(
+        //   create: (context) => DateCubit(),
+        // ),
+        // BlocProvider(
+        //   create: (context) => AmountBloc(HiveHelper(), context),
+        // ),
+        BlocProvider(create: (context) => HomeBloc(expenseRepository)),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

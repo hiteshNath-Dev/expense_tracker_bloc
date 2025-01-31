@@ -1,23 +1,22 @@
-import 'package:equatable/equatable.dart';
-import 'package:expense_tracker_bloc/data/models/expense_model.dart';
+part of 'home_bloc.dart';
 
-abstract class HomeState extends Equatable {
-  @override
-  // implement props
-  List<Object?> get props => [];
-}
+abstract class HomeState {}
 
 class HomeInitial extends HomeState {}
 
-class HomeLoadedState extends HomeState {
-  final List<ExpenseModel> expenseList;
-  final totalbalance;
-  final totalIncome;
-  final totalExpense;
+class HomeLoading extends HomeState {}
 
-  HomeLoadedState(
-      this.expenseList, this.totalbalance, this.totalIncome, this.totalExpense);
-  @override
-  List<Object?> get props =>
-      [expenseList, totalbalance, totalIncome, totalExpense];
+class HomeLoadedState extends HomeState {
+  final List<Expense> expenseList;
+  final double totalExpense;
+
+  HomeLoadedState({
+    required this.expenseList,
+    required this.totalExpense,
+  });
+}
+
+class HomeErrorState extends HomeState {
+  final String error;
+  HomeErrorState(this.error);
 }
