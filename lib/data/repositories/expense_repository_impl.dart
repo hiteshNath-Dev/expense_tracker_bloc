@@ -118,10 +118,10 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
 
   @override
   Future<Either<Failure, void>> updateExpense(
-      String id, Expense expense) async {
+      dynamic key, Expense expense) async {
     try {
       final model = expense.toModel();
-      await _hiveHelper.updateExpense(id, model);
+      await _hiveHelper.updateExpense(key, model);
       return const Right(null);
     } catch (e) {
       return Left(DatabaseFailure(e.toString()));

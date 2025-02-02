@@ -58,5 +58,17 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         },
       );
     });
+
+    on<HomeUpdateExpenseEvent>((event, emit) async {
+      // Update the expense in the repository
+      final updateResult =
+          await repository.updateExpense(event.key, event.expense);
+      updateResult.fold(
+        (failure) => emit(HomeErrorState(failure.message)),
+        (_) {
+          add(HomeLoadedEvent()); // Reload the list after updating
+        },
+      );
+    });
   }
 }

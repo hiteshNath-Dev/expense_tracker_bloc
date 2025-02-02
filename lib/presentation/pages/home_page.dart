@@ -1,4 +1,5 @@
 import 'package:expense_tracker_bloc/domain/entities/expense.dart';
+import 'package:expense_tracker_bloc/presentation/pages/edit_expense_page.dart';
 import 'package:expense_tracker_bloc/presentation/widgets/expense_pie_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -40,59 +41,12 @@ class _HomeViewState extends State<HomeView> {
           } else if (state is HomeLoadedState) {
             return Column(
               children: [
-                // Total Expense Card
-                Container(
-                  margin: const EdgeInsets.all(16),
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [
-                        AppColor.blackColor,
-                        AppColor.blueColor,
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.2),
-                        spreadRadius: 2,
-                        blurRadius: 5,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Total Expenses',
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          color: Colors.white70,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        '\$${state.totalExpense.toStringAsFixed(2)}',
-                        style: GoogleFonts.poppins(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
                 // Pie Chart for Expenses
                 Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: SizedBox(
-                    height: 200, // Set height for the pie chart
-                    child: ExpensePieChart(
-                        expenses: state.expenseList), // Pass the expenses
-                  ),
+
+                  child: ExpensePieChart(
+                      expenses: state.expenseList), // Pass the expenses
                 ),
 
                 // Recent Expenses
@@ -123,8 +77,7 @@ class _HomeViewState extends State<HomeView> {
                       final expense = state.expenseList[index];
 
                       return Dismissible(
-                        key: ValueKey(
-                            expense.key), // Ensure you have a unique id
+                        key: ValueKey(expense.key),
                         direction: DismissDirection.endToStart,
                         background: Container(
                           margin: const EdgeInsets.symmetric(vertical: 4),
@@ -144,57 +97,72 @@ class _HomeViewState extends State<HomeView> {
                                 HomeDeleteEvent(expense.key),
                               );
                         },
-                        child: Card(
-                          elevation: 0,
-                          margin: const EdgeInsets.symmetric(vertical: 4),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: BorderSide(
-                              color: Colors.grey.shade200,
-                            ),
-                          ),
-                          child: ListTile(
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
-                            leading: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: CategoryUtils.getColorForCategory(
-                                  ExpenseCategory.fromString(expense.category),
-                                ).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EditExpensePage(
+                                    expense: expense), // Navigate to edit page
                               ),
-                              child: Icon(
-                                CategoryUtils.getIconForCategory(
-                                  ExpenseCategory.fromString(expense.category),
+                            );
+                          },
+                          child: Card(
+                            elevation: 0,
+                            margin: const EdgeInsets.symmetric(vertical: 4),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: BorderSide(
+                                color: Colors.grey.shade200,
+                              ),
+                            ),
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              leading: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: CategoryUtils.getColorForCategory(
+                                    ExpenseCategory.fromString(
+                                        expense.category),
+                                  ).withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
-                                color: CategoryUtils.getColorForCategory(
-                                  ExpenseCategory.fromString(expense.category),
+                                child: Icon(
+                                  CategoryUtils.getIconForCategory(
+                                    ExpenseCategory.fromString(
+                                        expense.category),
+                                  ),
+                                  color: CategoryUtils.getColorForCategory(
+                                    ExpenseCategory.fromString(
+                                        expense.category),
+                                  ),
                                 ),
                               ),
-                            ),
-                            title: Text(
-                              expense.description,
-                              style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.w600,
+                              title: Text(
+                                expense.description,
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                            ),
-                            subtitle: Text(
-                              Utils.dateFormated(expense.date),
-                              style: GoogleFonts.poppins(
-                                color: Colors.grey,
-                                fontSize: 12,
+                              subtitle: Text(
+                                Utils.dateFormated(expense.date),
+                                style: GoogleFonts.poppins(
+                                  color: Colors.grey,
+                                  fontSize: 12,
+                                ),
                               ),
-                            ),
-                            trailing: Text(
-                              '\$${expense.amount}',
-                              style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                                color: CategoryUtils.getColorForCategory(
-                                  ExpenseCategory.fromString(expense.category),
+                              trailing: Text(
+                                '\$${expense.amount}',
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
+                                  color: CategoryUtils.getColorForCategory(
+                                    ExpenseCategory.fromString(
+                                        expense.category),
+                                  ),
                                 ),
                               ),
                             ),

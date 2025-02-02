@@ -25,7 +25,7 @@ abstract class ExpenseRepository {
   );
 
   /// Update an expense
-  Future<Either<Failure, void>> updateExpense(String id, Expense expense);
+  Future<Either<Failure, void>> updateExpense(dynamic key, Expense expense);
 
   /// Get expenses for current month
   Future<Either<Failure, List<Expense>>> getCurrentMonthExpenses();

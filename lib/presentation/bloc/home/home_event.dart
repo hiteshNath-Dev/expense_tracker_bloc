@@ -14,3 +14,10 @@ class HomeAddExpenseEvent extends HomeEvent {
 
   HomeAddExpenseEvent(this.expense);
 }
+
+class HomeUpdateExpenseEvent extends HomeEvent {
+  final dynamic key;
+  final Expense expense;
+
+  HomeUpdateExpenseEvent(this.key, this.expense);
+}
