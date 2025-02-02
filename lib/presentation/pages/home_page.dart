@@ -1,4 +1,5 @@
 import 'package:expense_tracker_bloc/domain/entities/expense.dart';
+import 'package:expense_tracker_bloc/presentation/widgets/expense_pie_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -81,6 +82,16 @@ class _HomeViewState extends State<HomeView> {
                         ),
                       ),
                     ],
+                  ),
+                ),
+
+                // Pie Chart for Expenses
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: SizedBox(
+                    height: 200, // Set height for the pie chart
+                    child: ExpensePieChart(
+                        expenses: state.expenseList), // Pass the expenses
                   ),
                 ),
 
